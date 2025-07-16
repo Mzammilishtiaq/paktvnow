@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { Timeline } from "vis-timeline/standalone";
+import { Timeline, type TimelineItem } from "vis-timeline/standalone";
 import { DataSet } from "vis-data/peer";
 import "vis-timeline/styles/vis-timeline-graph2d.min.css";
 import ReusableDialog from "../components/ui/dialog";
@@ -19,7 +19,7 @@ interface Channel {
 }
 
 interface Program {
-  id: string;
+id: string | number; // Change the type here to allow both string and number
   group: string;
   content: string;
   start: Date;
@@ -205,7 +205,7 @@ export default function TvGuideTimeline() {
         },
         // UPDATED: Display start and end times on the program bar
         template: (item: Program) => {
-          if (!item) return null;
+          if (!item) return "";
           const startTime =
             item.start instanceof Date && !isNaN(item.start.getTime())
               ? item.start.toLocaleTimeString([], {
@@ -242,42 +242,55 @@ export default function TvGuideTimeline() {
           `;
         },
 
-        onAdd: (item: Program, callback: (item: Program | null) => void) => {
+        onAdd: (
+          item: TimelineItem,
+          callback: (item: TimelineItem | null) => void
+        ) => {
           const newContent = prompt("New program name:", "New Program");
-          if (newContent !== null) {
-            item.content = newContent;
-            item.id = (Math.random() * 1e9).toFixed(0);
-            item.start = item.start instanceof Date ? item.start : new Date(); // Set to current date if invalid
-            item.end =
-              item.end instanceof Date
-                ? item.end
-                : new Date(item.start.getTime() + 3600000); // Default to 1 hour after start if invalid
-            setItems((prevItems) => [
-              ...prevItems,
-              { ...item, start: new Date(item.start), end: new Date(item.end) },
-            ]);
-            callback(item);
+          if (newContent !== null && item.group) {
+            const newProgram: Program = {
+              id: (Math.random() * 1e9).toFixed(0),
+              content: newContent,
+              start: new Date(item.start),
+              end: item.end
+                ? new Date(item.end)
+                : new Date(new Date(item.start).getTime() + 3600000),
+              group: String(item.group),
+              type: "range",
+            };
+            setItems((prevItems) => [...prevItems, newProgram]);
+            callback(newProgram);
           } else {
             callback(null);
           }
         },
-        onUpdate: (item: Program, callback: (item: Program) => void) => {
+        onUpdate: (
+          item: TimelineItem,
+          callback: (item: TimelineItem | null) => void
+        ) => {
+          if (!item.group || !item.end) {
+            callback(null); // Do not update if group or end is missing
+            return;
+          }
           setItems((prevItems) =>
             prevItems.map((i) =>
               i.id === item.id
                 ? {
                     ...i,
-                    content: item.content,
+                    content: String(item.content),
                     start: new Date(item.start),
-                    end: new Date(item.end),
-                    group: item.group,
+                    end: new Date(item.end!),
+                    group: String(item.group),
                   }
                 : i
             )
           );
           callback(item);
         },
-        onRemove: (item: Program, callback: (item: Program | null) => void) => {
+        onRemove: (
+          item: TimelineItem,
+          callback: (item: TimelineItem | null) => void
+        ) => {
           if (confirm("Are you sure you want to remove this program?")) {
             setItems((prevItems) => prevItems.filter((i) => i.id !== item.id));
             callback(item);
