@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { Timeline, type TimelineItem } from "vis-timeline/standalone";
+import type { TimelineTimeAxisScaleType } from "vis-timeline";
 import { DataSet } from "vis-data/peer";
 import "vis-timeline/styles/vis-timeline-graph2d.min.css";
 import ReusableDialog from "../components/ui/dialog";
@@ -34,49 +35,53 @@ export default function TvGuideTimeline() {
   const itemsDataSet = useRef<DataSet<Program> | null>(null);
   const groupsDataSet = useRef<DataSet<Channel> | null>(null);
   // State for selected date and time from carousels
-  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(
-    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }),
-  )
+    new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })
+  );
   const [items, setItems] = useState<Program[]>([
     {
       id: "1",
       group: "channel-a",
       content: "Morning News",
-      start: new Date(2025, 6, 14, 8, 0, 0),
-      end: new Date(2025, 6, 14, 9, 0, 0),
+      start: new Date(2025, 7, 24, 11, 0, 0),
+      end: new Date(2025, 7, 24, 12, 0, 0),
       type: "range",
     },
     {
       id: "2",
       group: "channel-a",
       content: "Talk Show",
-      start: new Date(2025, 6, 14, 9, 30, 0),
-      end: new Date(2025, 6, 14, 10, 30, 0),
+      start: new Date(2025, 7, 24, 11, 30, 0),
+      end: new Date(2025, 7, 24, 12, 30, 0),
       type: "range",
     },
     {
       id: "3",
       group: "channel-b",
       content: "Documentary",
-      start: new Date(2025, 6, 14, 10, 0, 0),
-      end: new Date(2025, 6, 14, 11, 30, 0),
+      start: new Date(2025, 7, 24, 11, 0, 0),
+      end: new Date(2025, 7, 24, 12, 30, 0),
       type: "range",
     },
     {
       id: "4",
       group: "channel-c",
       content: "Kids Show",
-      start: new Date(2025, 6, 14, 11, 0, 0),
-      end: new Date(2025, 6, 14, 12, 0, 0),
+      start: new Date(2025, 7, 24, 11, 0, 0),
+      end: new Date(2025, 7, 24, 12, 0, 0),
       type: "range",
     },
     {
       id: "5",
       group: "channel-a",
       content: "Evening Movie",
-      start: new Date(2025, 6, 14, 19, 0, 0),
-      end: new Date(2025, 6, 14, 21, 0, 0),
+      start: new Date(2025, 7, 24, 11, 0, 0),
+      end: new Date(2025, 7, 24, 2, 0, 0),
       type: "range",
     },
   ]);
@@ -179,65 +184,100 @@ export default function TvGuideTimeline() {
     setIsEditDialogOpen(false);
   };
 
-    // --- Carousel Handlers ---
-    const handleSelectDate = useCallback((date: Date) => {
-      setSelectedDate(date)
-      if (timelineInstance.current) {
-        const currentWindow = timelineInstance.current.getWindow()
-        const newStart = new Date(date)
-        newStart.setHours(currentWindow.start.getHours(), currentWindow.start.getMinutes(), 0, 0)
-        const newEnd = new Date(date)
-        newEnd.setHours(currentWindow.end.getHours(), currentWindow.end.getMinutes(), 0, 0)
-        timelineInstance.current.setWindow(newStart, newEnd)
-      }
-    }, [])
-  
-    // const handleSelectTime = useCallback(
-    //   (timeString: string) => {
-    //     setSelectedTime(timeString)
-    //     if (timelineInstance.current) {
-    //       const [time, ampm] = timeString.split(" ")
-    //       // eslint-disable-next-line prefer-const
-    //       let [hours, minutes] = time.split(":").map(Number)
-  
-    //       if (ampm === "PM" && hours !== 12) {
-    //         hours += 12
-    //       } else if (ampm === "AM" && hours === 12) {
-    //         hours = 0
-    //       }
-  
-    //       const currentWindow = timelineInstance.current.getWindow()
-    //       const currentStart = currentWindow.start
-    //       const currentEnd = currentWindow.end
-  
-    //       const newStart = new Date(selectedDate)
-    //       newStart.setHours(hours, minutes, 0, 0)
-  
-    //       // Calculate new end based on the original window duration
-    //       const duration = currentEnd.getTime() - currentStart.getTime()
-    //       const newEnd = new Date(newStart.getTime() + duration)
-  
-    //       timelineInstance.current.setWindow(newStart, newEnd)
-    //     }
-    //   },
-    //   [selectedDate],
-    // )
-  
-    const handleGoLive = useCallback(() => {
-      const now = new Date()
-      setSelectedDate(now)
-      setSelectedTime(now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }))
-  
-      if (timelineInstance.current) {
-        const startOfHour = new Date(now)
-        startOfHour.setMinutes(0, 0, 0)
-        const endOfHour = new Date(now)
-        endOfHour.setHours(now.getHours() + 1, 0, 0, 0) // Show 1 hour window around current time
-  
-        timelineInstance.current.setWindow(startOfHour, endOfHour)
-      }
-    }, [])
+  // --- Carousel Handlers ---
+  const handleSelectDate = useCallback((date: Date) => {
+    setSelectedDate(date);
+    if (timelineInstance.current) {
+      const currentWindow = timelineInstance.current.getWindow();
+      const newStart = new Date(date);
+      newStart.setHours(
+        currentWindow.start.getHours(),
+        currentWindow.start.getMinutes(),
+        0,
+        0
+      );
+      const newEnd = new Date(date);
+      newEnd.setHours(
+        currentWindow.end.getHours(),
+        currentWindow.end.getMinutes(),
+        0,
+        0
+      );
+      timelineInstance.current.setWindow(newStart, newEnd);
+    }
+  }, []);
 
+  // const handleSelectTime = useCallback(
+  //   (timeString: string) => {
+  //     setSelectedTime(timeString)
+  //     if (timelineInstance.current) {
+  //       const [time, ampm] = timeString.split(" ")
+  //       // eslint-disable-next-line prefer-const
+  //       let [hours, minutes] = time.split(":").map(Number)
+
+  //       if (ampm === "PM" && hours !== 12) {
+  //         hours += 12
+  //       } else if (ampm === "AM" && hours === 12) {
+  //         hours = 0
+  //       }
+
+  //       const currentWindow = timelineInstance.current.getWindow()
+  //       const currentStart = currentWindow.start
+  //       const currentEnd = currentWindow.end
+
+  //       const newStart = new Date(selectedDate)
+  //       newStart.setHours(hours, minutes, 0, 0)
+
+  //       // Calculate new end based on the original window duration
+  //       const duration = currentEnd.getTime() - currentStart.getTime()
+  //       const newEnd = new Date(newStart.getTime() + duration)
+
+  //       timelineInstance.current.setWindow(newStart, newEnd)
+  //     }
+  //   },
+  //   [selectedDate],
+  // )
+
+  const handleGoLive = useCallback(() => {
+    const now = new Date();
+    setSelectedDate(now);
+    setSelectedTime(
+      now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })
+    );
+
+    if (timelineInstance.current) {
+      const startOfHour = new Date(now);
+      startOfHour.setMinutes(0, 0, 0);
+      const endOfHour = new Date(now);
+      endOfHour.setHours(now.getHours() + 1, 0, 0, 0); // Show 1 hour window around current time
+
+      timelineInstance.current.setWindow(startOfHour, endOfHour);
+    }
+  }, []);
+
+  // load vis.js current time run
+  useEffect(() => {
+    const handleWindowLoad = () => {
+      const now = new Date();
+      if (timelineInstance.current) {
+        const startOfHour = new Date(now);
+        startOfHour.setMinutes(0, 0, 0);
+        const endOfHour = new Date(now);
+        endOfHour.setHours(now.getHours() + 1, 0, 0, 0); // Show 1 hour window around current time
+
+        timelineInstance.current.setWindow(startOfHour, endOfHour);
+      }
+    };
+
+    if (document.readyState === "complete") {
+      handleWindowLoad();
+    } else {
+      window.addEventListener("load", handleWindowLoad);
+      return () => {
+        window.removeEventListener("load", handleWindowLoad);
+      };
+    }
+  }, []);
   // --- Main Effect for Timeline Initialization (runs ONLY ONCE) ---
   useEffect(() => {
     if (timelineRef.current && !timelineInstance.current) {
@@ -255,15 +295,24 @@ export default function TvGuideTimeline() {
         },
         orientation: "top",
         stack: false,
-        // zoomMax: 1000 * 60 * 60 * 24 * 30,
-        // zoomMin: 1000 * 60 * 5,
+        zoomable: false,
+        moveable:true,
+        // Disable zoom functionality by not setting zoomMax and zoomMin
+        zoomMax: 1000*60*60, // Disable zooming to maximum
+        zoomMin: 1000*60*30, // Disable zooming to minimum
         start: new Date(new Date().setHours(7, 0, 0, 0)),
         end: new Date(new Date().setHours(23, 0, 0, 0)),
         showMajorLabels: false,
-        showMinorLabels: false,
+        showMinorLabels: true,
         showCurrentTime: true,
+        timeStep: 5 * 60 * 1000, // 30 minutes interval (30 * 60 * 1000 ms)
+        snap: function (date: Date) {
+          const ms = 1000 * 60 * 5; // 30 minutes in ms
+          return new Date(Math.round(date.valueOf() / ms) * ms);
+        },
+        timeAxis: { scale: 'minute'as TimelineTimeAxisScaleType, step: 5 },
         margin: {
-          item: 0,
+          item: 10,
           axis: 5,
         },
         format: {
@@ -274,6 +323,9 @@ export default function TvGuideTimeline() {
           },
           majorLabels: {
             // month: "",
+          },
+          style: {
+            border: "none", // Remove border box
           },
         },
         // UPDATED: Display start and end times on the program bar
@@ -300,7 +352,7 @@ export default function TvGuideTimeline() {
             </div>
           `;
         },
-        
+
         groupTemplate: (group: Channel) => {
           if (!group) return "";
           console.log(group); // Debugging purpose
@@ -309,7 +361,7 @@ export default function TvGuideTimeline() {
             <div class="flex items-center gap-2 p-2">
               ${
                 group.logo
-                  ? `<img src="${group.logo}" alt="${group.content} logo" width="100px" />`
+                  ? `<img src="${group.logo}" alt="${group.content} logo" width="120px" />`
                   : `<span class="text-sm font-medium">${group.content}</span>`
               }
             </div>
@@ -380,7 +432,22 @@ export default function TvGuideTimeline() {
         groupsDataSet.current,
         options
       );
+ // Initial sync with current time
+ timelineInstance.current.setWindow(new Date(), new Date(new Date().getTime() + 60 * 60 * 1000));
 
+  // Ensure the current time is shown immediately after loading
+  const currentTime = timelineInstance.current.getCurrentTime();
+  setSelectedTime(new Date(currentTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }));
+
+  
+    // Sync with the carousel
+    timelineInstance.current.on("rangechange", () => {
+      if (!timelineInstance.current) return;
+      const currentTime = timelineInstance.current.getWindow().start;
+      setSelectedTime(new Date(currentTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }));
+    });
+
+    
       // Add event listener for item selection
       timelineInstance.current.on("select", (properties) => {
         if (properties.items.length > 0) {
@@ -411,6 +478,7 @@ export default function TvGuideTimeline() {
         }
       };
     }
+    
   }, []); //items, groups
 
   // --- Effects for synchronizing React state with vis.js DataSets ---
@@ -429,9 +497,9 @@ export default function TvGuideTimeline() {
   }, [groups]);
 
   return (
-    <div className="w-full h-[calc(100vh-64px)] p-4">
+    <div className="w-full h-[100vh] p-4 bg-gray-100">
       <h1 className="text-2xl font-bold mb-4">TV Guide Admin Panel</h1>
-      <div className="flex justify-between items-center gap-2 mb-4">
+      <div className="flex justify-between items-center gap-2">
         <div className="flex items-center space-x-3">
           <button onClick={setTodayView} disabled={!isTimelineReady}>
             Today
@@ -463,16 +531,24 @@ export default function TvGuideTimeline() {
           </button>
         </div>
       </div>
-      <DateCarousel onSelectDate={handleSelectDate} selectedDate={selectedDate} />
+      <DateCarousel
+        onSelectDate={handleSelectDate}
+        selectedDate={selectedDate}
+      />
 
-{/* Custom Time Carousel */}
-<div className="flex items-center bg-gray-800 text-white p-2 rounded-b-lg mb-4">
-  <button onClick={handleGoLive} className="bg-gray-600 hover:bg-gray-500 text-white mr-4">
-    <span className="h-2 w-2 rounded-full bg-red-500 mr-2" /> Go Live
-  </button>
-  <TimeCarousel  selectedTime={selectedTime} />
-</div>
-      <div ref={timelineRef} className="h-screen" />
+      {/* Custom Time Carousel */}
+      <div className="flex items-center bg-gray-800 text-white px-1 rounded-b-lg mb-4 time-carousel-container gap-1">
+       <div className="bg-white p-2">
+       <button
+          onClick={handleGoLive}
+          className="bg-gray-600 hover:bg-gray-500 text-white flex items-center justify-center gap-x-1 w-[80px]"
+        >
+          <div className="h-3 w-3 rounded-full bg-red-500" /> <span className="text-sm font-bold">Go Live</span>
+        </button>
+       </div>
+        <TimeCarousel selectedTime={selectedTime} />
+      </div>
+      <div ref={timelineRef} className="h-screen -mt-3" />
       {selectedItem && (
         <ReusableDialog
           open={isEditDialogOpen}
