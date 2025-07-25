@@ -524,11 +524,12 @@ export default function TvGuideTimeline() {
   const setTimelineWindow = () => {
     try {
       const now = new Date();
+      // Set the window to show a 2.5 hour range centered around current time
       const startOfWindow = new Date(now);
-      startOfWindow.setHours(now.getHours() - 3, now.getMinutes(), 0, 0); // 3 hours before current time
+      startOfWindow.setMinutes(now.getMinutes() - 90, 0, 0); // 1.5 hours before current time
 
       const endOfWindow = new Date(now);
-      endOfWindow.setHours(now.getHours() + 3, now.getMinutes(), 0, 0); // 3 hours after current time (total 6 hours)
+      endOfWindow.setMinutes(now.getMinutes() + 50, 0, 0); // 1.5 hours after current time (total 3 hours)
 
       // Debugging: Check the window start and end times
       console.log("startOfWindow:", startOfWindow);

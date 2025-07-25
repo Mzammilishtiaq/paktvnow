@@ -29,7 +29,7 @@ const ALL_TIME_SLOTS = generateTimeSlots();
 
 export default function TimeCarousel({ selectedTime,onRangeChange }: TimeCarouselProps) {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
-  const itemsPerPage = 12; // Number of time slots to show at once (1 hour)
+  const itemsPerPage = 5; // Number of time slots to show at once (1 hour)
   const [currentTime, setCurrentTime] = React.useState(
     new Date().toLocaleTimeString([], {
       hour: "2-digit",
