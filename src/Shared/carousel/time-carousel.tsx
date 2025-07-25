@@ -4,12 +4,13 @@ import { cn } from "../../lib/utlils";
 interface TimeCarouselProps {
   // onCurrentTime: (time: string) => void
   selectedTime: string; // e.g., "11:00 AM"
+  onRangeChange: (start: string, end: string) => void;
 }
 
 const generateTimeSlots = () => {
   const slots = [];
   for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 5) {
+    for (let m = 0; m < 60; m += 30) {
       const date = new Date();
       date.setHours(h, m, 0, 0);
       slots.push(
@@ -26,7 +27,7 @@ const generateTimeSlots = () => {
 
 const ALL_TIME_SLOTS = generateTimeSlots();
 
-export default function TimeCarousel({ selectedTime }: TimeCarouselProps) {
+export default function TimeCarousel({ selectedTime,onRangeChange }: TimeCarouselProps) {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const itemsPerPage = 12; // Number of time slots to show at once (1 hour)
   const [currentTime, setCurrentTime] = React.useState(
@@ -67,6 +68,7 @@ export default function TimeCarousel({ selectedTime }: TimeCarouselProps) {
     setVisibleStartIndex((prev) => {
       const newIndex = Math.max(0, prev - itemsPerPage);
       // Always align to the start of the hour (multiple of 12)
+      updateRange(newIndex);
       return newIndex - (newIndex % itemsPerPage);
     });
   };
@@ -76,11 +78,22 @@ export default function TimeCarousel({ selectedTime }: TimeCarouselProps) {
       const maxIndex = ALL_TIME_SLOTS.length - itemsPerPage;
       let newIndex = Math.min(maxIndex, prev + itemsPerPage);
       // Always align to the start of the hour (multiple of 12)
+      updateRange(newIndex);
       newIndex = newIndex - (newIndex % itemsPerPage);
       return newIndex;
     });
   };
 
+  const updateRange = (startIndex: number) => {
+    const start = ALL_TIME_SLOTS[startIndex];
+    const end = ALL_TIME_SLOTS[startIndex + itemsPerPage - 1];
+    if (start && end) {
+      onRangeChange(start, end);
+    }
+  };
+  React.useEffect(() => {
+    updateRange(visibleStartIndex);
+  }, []);
   // Update current time every 30 seconds (or as needed)
   React.useEffect(() => {
     const timeInterval = setInterval(() => {
@@ -91,7 +104,7 @@ export default function TimeCarousel({ selectedTime }: TimeCarouselProps) {
           hour12: true,
         })
       );
-    }, 1000 * 1); // 30 seconds interval
+    }, 1000 * 30); // 30 seconds interval
 
     return () => {
       clearInterval(timeInterval);

@@ -14,6 +14,7 @@ import AryNews from "../assets/usa-network.png";
 import { ArrowRightIcon, ArrowLeftIcon, Calendar1 } from "lucide-react";
 import DateCarousel from "./carousel/date-carousel";
 import TimeCarousel from "./carousel/time-carousel";
+import { EditProgramForm } from "./EditProgramForm";
 interface Channel {
   id: string;
   content: string;
@@ -48,43 +49,43 @@ export default function TvGuideTimeline() {
       id: "1",
       group: "channel-a",
       content: "Morning News",
-      start: new Date(2025, 7, 24, 11, 0, 0),
-      end: new Date(2025, 7, 24, 12, 0, 0),
+      start: new Date(2025, 6, 14, 8, 0, 0),
+      end: new Date(2025, 6, 14, 9, 0, 0),
       type: "range",
     },
     {
       id: "2",
       group: "channel-a",
       content: "Talk Show",
-      start: new Date(2025, 7, 24, 11, 30, 0),
-      end: new Date(2025, 7, 24, 12, 30, 0),
+      start: new Date(2025, 6, 14, 9, 30, 0),
+      end: new Date(2025, 6, 14, 10, 30, 0),
       type: "range",
     },
     {
       id: "3",
       group: "channel-b",
       content: "Documentary",
-      start: new Date(2025, 7, 24, 11, 0, 0),
-      end: new Date(2025, 7, 24, 12, 30, 0),
+      start: new Date(2025, 6, 14, 10, 0, 0),
+      end: new Date(2025, 6, 14, 11, 30, 0),
       type: "range",
     },
     {
       id: "4",
       group: "channel-c",
       content: "Kids Show",
-      start: new Date(2025, 7, 24, 11, 0, 0),
-      end: new Date(2025, 7, 24, 12, 0, 0),
+      start: new Date(2025, 6, 14, 11, 0, 0),
+      end: new Date(2025, 6, 14, 12, 0, 0),
       type: "range",
     },
     {
       id: "5",
       group: "channel-a",
       content: "Evening Movie",
-      start: new Date(2025, 7, 24, 11, 0, 0),
-      end: new Date(2025, 7, 24, 2, 0, 0),
+      start: new Date(2025, 6, 14, 19, 0, 0),
+      end: new Date(2025, 6, 14, 21, 0, 0),
       type: "range",
     },
-  ]);
+  ])
 
   // Add a ref to always have the latest items
   const itemsRef = useRef(items);
@@ -107,52 +108,52 @@ export default function TvGuideTimeline() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // --- Navigation functions ---
-  const setTodayView = () => {
-    if (timelineInstance.current) {
-      const now = new Date();
-      const startOfDay = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        0,
-        0,
-        0
-      );
-      const endOfDay = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        23,
-        59,
-        59
-      );
-      timelineInstance.current.setWindow(startOfDay, endOfDay);
-    }
-  };
+  // const setTodayView = () => {
+  //   if (timelineInstance.current) {
+  //     const now = new Date();
+  //     const startOfDay = new Date(
+  //       now.getFullYear(),
+  //       now.getMonth(),
+  //       now.getDate(),
+  //       0,
+  //       0,
+  //       0
+  //     );
+  //     const endOfDay = new Date(
+  //       now.getFullYear(),
+  //       now.getMonth(),
+  //       now.getDate(),
+  //       23,
+  //       59,
+  //       59
+  //     );
+  //     timelineInstance.current.setWindow(startOfDay, endOfDay);
+  //   }
+  // };
 
-  const setWeekView = () => {
-    if (timelineInstance.current) {
-      const now = new Date();
-      const dayOfWeek = now.getDay(); // 0 for Sunday, 1 for Monday, etc.
-      const startOfWeek = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() - dayOfWeek,
-        0,
-        0,
-        0
-      );
-      const endOfWeek = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() - dayOfWeek + 6,
-        23,
-        59,
-        59
-      );
-      timelineInstance.current.setWindow(startOfWeek, endOfWeek);
-    }
-  };
+  // const setWeekView = () => {
+  //   if (timelineInstance.current) {
+  //     const now = new Date();
+  //     const dayOfWeek = now.getDay(); // 0 for Sunday, 1 for Monday, etc.
+  //     const startOfWeek = new Date(
+  //       now.getFullYear(),
+  //       now.getMonth(),
+  //       now.getDate() - dayOfWeek,
+  //       0,
+  //       0,
+  //       0
+  //     );
+  //     const endOfWeek = new Date(
+  //       now.getFullYear(),
+  //       now.getMonth(),
+  //       now.getDate() - dayOfWeek + 6,
+  //       23,
+  //       59,
+  //       59
+  //     );
+  //     timelineInstance.current.setWindow(startOfWeek, endOfWeek);
+  //   }
+  // };
 
   const moveTimeline = (direction: "back" | "next") => {
     if (timelineInstance.current) {
@@ -168,11 +169,11 @@ export default function TvGuideTimeline() {
   };
 
   // --- Handle Edit Dialog ---
-  const handleEditClick = () => {
-    if (selectedItem) {
-      setIsEditDialogOpen(true);
-    }
-  };
+  // const handleEditClick = () => {
+  //   if (selectedItem) {
+  //     setIsEditDialogOpen(true);
+  //   }
+  // };
 
   const handleSaveEdit = (updatedProgram: Program) => {
     setItems((prevItems) =>
@@ -252,8 +253,34 @@ export default function TvGuideTimeline() {
       endOfHour.setHours(now.getHours() + 1, 0, 0, 0); // Show 1 hour window around current time
 
       timelineInstance.current.setWindow(startOfHour, endOfHour);
+      setTimelineWindow()
     }
   }, []);
+
+  const handleTimeRangeChange = (start: string, end: string) => {
+  const today = new Date(selectedDate); // assuming selectedDate has correct date
+
+  const parseTime = (timeStr: string) => {
+    const [time, ampm] = timeStr.split(" ");
+    const [rawHours, tempMinutes] = time.split(":").map(Number);
+    const minutes = tempMinutes;
+    let hours = rawHours;
+    if (ampm === "PM" && hours !== 12) hours += 12;
+    if (ampm === "AM" && hours === 12) hours = 0;
+    const date = new Date(today);
+    date.setHours(hours, minutes, 0, 0);
+    return date;
+  };
+
+  const startDate = parseTime(start);
+  const endDate = parseTime(end);
+  endDate.setMinutes(endDate.getMinutes() + 30); // ensure 30-minute interval
+
+  if (timelineInstance.current) {
+    timelineInstance.current.setWindow(startDate, endDate);
+  }
+};
+
 
   // load vis.js current time run
   useEffect(() => {
@@ -266,6 +293,7 @@ export default function TvGuideTimeline() {
         endOfHour.setHours(now.getHours() + 1, 0, 0, 0); // Show 1 hour window around current time
 
         timelineInstance.current.setWindow(startOfHour, endOfHour);
+          setTimelineWindow();
       }
     };
 
@@ -298,19 +326,28 @@ export default function TvGuideTimeline() {
         zoomable: false,
         moveable:true,
         // Disable zoom functionality by not setting zoomMax and zoomMin
-        zoomMax: 1000*60*60, // Disable zooming to maximum
+        zoomMax: 1000*60*60*6, // Disable zooming to maximum
         zoomMin: 1000*60*30, // Disable zooming to minimum
         start: new Date(new Date().setHours(7, 0, 0, 0)),
         end: new Date(new Date().setHours(23, 0, 0, 0)),
         showMajorLabels: false,
         showMinorLabels: true,
         showCurrentTime: true,
-        timeStep: 5 * 60 * 1000, // 30 minutes interval (30 * 60 * 1000 ms)
+        currentTime: {
+          customMarkup: `
+            <div class="vis-custom-current-time-marker">
+              <div class="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-sm absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                Now Live
+              </div>
+            </div>
+          `,
+        },
+        timeAxis: { scale: 'minute' as TimelineTimeAxisScaleType, step: 30 },
+        timeStep: 30 * 60 * 1000, // 30 minutes
         snap: function (date: Date) {
-          const ms = 1000 * 60 * 5; // 30 minutes in ms
+          const ms = 1000 * 60 * 30; // 30 minutes in ms
           return new Date(Math.round(date.valueOf() / ms) * ms);
         },
-        timeAxis: { scale: 'minute'as TimelineTimeAxisScaleType, step: 5 },
         margin: {
           item: 10,
           axis: 5,
@@ -469,7 +506,9 @@ export default function TvGuideTimeline() {
         }
       });
       setIsTimelineReady(true);
-
+      if (timelineInstance.current) {
+        setTimelineWindow();
+      }
       return () => {
         if (timelineInstance.current) {
           timelineInstance.current.destroy();
@@ -481,6 +520,40 @@ export default function TvGuideTimeline() {
     
   }, []); //items, groups
 
+  // Function to set the timeline window
+  const setTimelineWindow = () => {
+    try {
+      const now = new Date();
+      const startOfWindow = new Date(now);
+      startOfWindow.setHours(now.getHours() - 3, now.getMinutes(), 0, 0); // 3 hours before current time
+
+      const endOfWindow = new Date(now);
+      endOfWindow.setHours(now.getHours() + 3, now.getMinutes(), 0, 0); // 3 hours after current time (total 6 hours)
+
+      // Debugging: Check the window start and end times
+      console.log("startOfWindow:", startOfWindow);
+      console.log("endOfWindow:", endOfWindow);
+
+      // Check if the dates are valid
+      if (isNaN(startOfWindow.getTime()) || isNaN(endOfWindow.getTime())) {
+        console.error("Invalid start or end time");
+        return;
+      }
+
+      if (timelineInstance.current) {
+        timelineInstance.current.setWindow(startOfWindow, endOfWindow);
+      }
+    } catch (error) {
+      console.error("Error setting window:", error);
+    }
+  };
+
+    // Set initial timeline window to show a 6-hour range centered around current time
+    useEffect(() => {
+      if (isTimelineReady) {
+        setTimelineWindow(); // Set the window when the timeline is ready
+      }
+    }, [isTimelineReady]);
   // --- Effects for synchronizing React state with vis.js DataSets ---
   useEffect(() => {
     if (itemsDataSet.current) {
@@ -496,25 +569,54 @@ export default function TvGuideTimeline() {
     }
   }, [groups]);
 
+
+
+  // Function to handle item update in vis.js
+const handleUpdate = (item: TimelineItem) => {
+  // Create a new item object with updated data
+const updatedItem = {
+  id: item.id,
+  group: String(item.group ?? ""),
+  content: String(item.content ?? ""),
+  start: new Date(item.start ?? new Date()),
+  end: new Date(item.end ?? new Date()),
+  type: "range" as const,
+};
+
+  // Update the program data in the React state
+  setItems((prevItems) =>
+    prevItems.map((program) =>
+      program.id === updatedItem.id ? updatedItem : program  // Find the matching item and update it
+    )
+  );
+
+  // Set the updated item as the selected item for the form
+  setSelectedItem(updatedItem);
+  setIsEditDialogOpen(true); // Open the dialog for editing
+};
+
+// UseEffect hook to listen to 'update' events from vis.js
+useEffect(() => {
+  if (timelineInstance.current) {
+    // Listen for the update event from vis.js
+    timelineInstance.current.on("update", (properties) => {
+      if (properties.items.length > 0) {
+        const selectedId = properties.items[0];  // Get the id of the updated item
+        const item = items.find((i) => i.id === selectedId);  // Find the updated item in the state
+
+        if (item) {
+          handleUpdate(item);  // Pass the updated item to handleUpdate function
+        }
+      }
+    });
+  }
+}, [items]);  // Ensure the effect runs when items change
+
+
   return (
     <div className="w-full h-[100vh] p-4 bg-gray-100">
       <h1 className="text-2xl font-bold mb-4">TV Guide Admin Panel</h1>
       <div className="flex justify-between items-center gap-2">
-        <div className="flex items-center space-x-3">
-          <button onClick={setTodayView} disabled={!isTimelineReady}>
-            Today
-          </button>
-          <button onClick={setWeekView} disabled={!isTimelineReady}>
-            Week
-          </button>
-
-          <button
-            onClick={handleEditClick}
-            disabled={!isTimelineReady || !selectedItem}
-          >
-            Edit Selected Program
-          </button>
-        </div>
         <div className="flex items-center space-x-3">
           <button
             onClick={() => moveTimeline("back")}
@@ -546,7 +648,7 @@ export default function TvGuideTimeline() {
           <div className="h-3 w-3 rounded-full bg-red-500" /> <span className="text-sm font-bold">Go Live</span>
         </button>
        </div>
-        <TimeCarousel selectedTime={selectedTime} />
+        <TimeCarousel selectedTime={selectedTime} onRangeChange={handleTimeRangeChange} />
       </div>
       <div ref={timelineRef} className="h-screen -mt-3" />
       {selectedItem && (
@@ -566,120 +668,3 @@ export default function TvGuideTimeline() {
   );
 }
 
-// Separate component for the edit form within the dialog
-interface EditProgramFormProps {
-  program: Program;
-  channels: Channel[];
-  onSave: (updatedProgram: Program) => void;
-}
-
-function EditProgramForm({ program, channels, onSave }: EditProgramFormProps) {
-  const [formData, setFormData] = useState({
-    content: program.content,
-    start:
-      program.start instanceof Date && !isNaN(program.start.getTime())
-        ? program.start.toISOString().slice(0, 16)
-        : "",
-    end:
-      program.end instanceof Date && !isNaN(program.end.getTime())
-        ? program.end.toISOString().slice(0, 16)
-        : "",
-    group: program.group,
-  });
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Ensure start and end times are valid
-    const startDate = new Date(formData.start);
-    const endDate = new Date(formData.end);
-
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      alert("Please provide valid start and end times.");
-      return;
-    }
-
-    const updatedProgram: Program = {
-      ...program,
-      content: formData.content,
-      start: startDate,
-      end: endDate,
-      group: formData.group,
-    };
-
-    onSave(updatedProgram);
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="grid gap-4 py-4 bg-white">
-      <div className="grid grid-cols-4 items-center gap-4">
-        <label htmlFor="content" className="text-right">
-          Title
-        </label>
-        <input
-          id="content"
-          name="content"
-          value={formData.content}
-          onChange={handleChange}
-          className="col-span-3"
-          required
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <label htmlFor="start" className="text-right">
-          Start Time
-        </label>
-        <input
-          id="start"
-          name="start"
-          type="datetime-local"
-          value={formData.start}
-          onChange={handleChange}
-          className="col-span-3"
-          required
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <label htmlFor="end" className="text-right">
-          End Time
-        </label>
-        <input
-          id="end"
-          name="end"
-          type="datetime-local"
-          value={formData.end}
-          onChange={handleChange}
-          className="col-span-3"
-          required
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <label htmlFor="group" className="text-right">
-          Channel
-        </label>
-        <select
-          id="group"
-          name="group"
-          value={formData.group}
-          onChange={handleChange}
-          className="col-span-3 border rounded-md p-2"
-          required
-        >
-          {channels.map((channel) => (
-            <option key={channel.id} value={channel.id}>
-              {channel.content}
-            </option>
-          ))}
-        </select>
-      </div>
-      <button type="submit">Save changes</button>
-    </form>
-  );
-}
