@@ -5,6 +5,7 @@ interface TimeCarouselProps {
   // onCurrentTime: (time: string) => void
   selectedTime: string; // e.g., "11:00 AM"
   onRangeChange: (start: string, end: string) => void;
+  onTimeScroll: (direction: "back" | "next") => void; // Function to trigger timeline scroll
 }
 
 const generateTimeSlots = () => {
@@ -27,9 +28,9 @@ const generateTimeSlots = () => {
 
 const ALL_TIME_SLOTS = generateTimeSlots();
 
-export default function TimeCarousel({ selectedTime,onRangeChange }: TimeCarouselProps) {
+export default function TimeCarousel({ selectedTime,onRangeChange, onTimeScroll }: TimeCarouselProps) {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
-  const itemsPerPage = 5; // Number of time slots to show at once (1 hour)
+  const itemsPerPage = 6; // Number of time slots to show at once (1 hour)
   const [currentTime, setCurrentTime] = React.useState(
     new Date().toLocaleTimeString([], {
       hour: "2-digit",
@@ -59,30 +60,32 @@ export default function TimeCarousel({ selectedTime,onRangeChange }: TimeCarouse
   const visibleTimeSlots = React.useMemo(() => {
     return ALL_TIME_SLOTS.slice(
       visibleStartIndex,
-      visibleStartIndex + itemsPerPage
+      visibleStartIndex + itemsPerPage,
+      
     );
   }, [visibleStartIndex]);
 
-  // Scroll left/right by 1 hour (12 slots), always align to the start of the hour
-  const scrollLeft = () => {
-    setVisibleStartIndex((prev) => {
-      const newIndex = Math.max(0, prev - itemsPerPage);
-      // Always align to the start of the hour (multiple of 12)
-      updateRange(newIndex);
-      return newIndex - (newIndex % itemsPerPage);
-    });
-  };
+ // Scroll left by 2 hours (4 slots), always align to the start of the hour
+ const scrollLeft = () => {
+  setVisibleStartIndex((prev) => {
+    const newIndex = Math.max(0, prev - itemsPerPage * 2);
+    updateRange(newIndex);
+    return newIndex;
+  });
+  onTimeScroll("back"); // Trigger timeline scroll
+};
 
-  const scrollRight = () => {
-    setVisibleStartIndex((prev) => {
-      const maxIndex = ALL_TIME_SLOTS.length - itemsPerPage;
-      let newIndex = Math.min(maxIndex, prev + itemsPerPage);
-      // Always align to the start of the hour (multiple of 12)
-      updateRange(newIndex);
-      newIndex = newIndex - (newIndex % itemsPerPage);
-      return newIndex;
-    });
-  };
+// Scroll right by 2 hours (4 slots), always align to the start of the hour
+const scrollRight = () => {
+  setVisibleStartIndex((prev) => {
+    const maxIndex = ALL_TIME_SLOTS.length - itemsPerPage;
+    let newIndex = Math.min(maxIndex, prev + itemsPerPage * 2);
+    updateRange(newIndex);
+    newIndex = newIndex - (newIndex % itemsPerPage);
+    return newIndex;
+  });
+  onTimeScroll("next"); // Trigger timeline scroll
+};
 
   const updateRange = (startIndex: number) => {
     const start = ALL_TIME_SLOTS[startIndex];
@@ -145,7 +148,7 @@ export default function TimeCarousel({ selectedTime,onRangeChange }: TimeCarouse
                 </button>
                 {isLiveNow && (
                   <div className="flex flex-col justify-center items-center absolute top-0">
-                    <div className="bg-red-500 text-white">Now Live</div>
+                    <div className={`bg-red-500 text-white`}>Now Live</div>
                     <div className="border-2 border-r-red-500 h-10" />
                   </div>
                 )}
