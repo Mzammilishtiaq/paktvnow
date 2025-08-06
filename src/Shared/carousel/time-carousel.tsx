@@ -6,6 +6,8 @@ interface TimeCarouselProps {
   selectedTime: string; // e.g., "11:00 AM"
   onRangeChange: (start: string, end: string) => void;
   onTimeScroll: (direction: "back" | "next") => void; // Function to trigger timeline scroll
+  leftslide:()=>void;
+  rightslide:()=>void;
 }
 
 const generateTimeSlots = () => {
@@ -28,7 +30,7 @@ const generateTimeSlots = () => {
 
 const ALL_TIME_SLOTS = generateTimeSlots();
 
-export default function TimeCarousel({ selectedTime,onRangeChange, onTimeScroll }: TimeCarouselProps) {
+export default function TimeCarousel({ selectedTime,onRangeChange,leftslide,rightslide }: TimeCarouselProps) {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const itemsPerPage = 6; // Number of time slots to show at once (1 hour)
   const [currentTime, setCurrentTime] = React.useState(
@@ -66,26 +68,26 @@ export default function TimeCarousel({ selectedTime,onRangeChange, onTimeScroll 
   }, [visibleStartIndex]);
 
  // Scroll left by 2 hours (4 slots), always align to the start of the hour
- const scrollLeft = () => {
-  setVisibleStartIndex((prev) => {
-    const newIndex = Math.max(0, prev - itemsPerPage * 2);
-    updateRange(newIndex);
-    return newIndex;
-  });
-  onTimeScroll("back"); // Trigger timeline scroll
-};
+//  const scrollLeft = () => {
+//   setVisibleStartIndex((prev) => {
+//     const newIndex = Math.max(0, prev - itemsPerPage * 2);
+//     updateRange(newIndex);
+//     return newIndex;
+//   });
+//   onTimeScroll("back"); // Trigger timeline scroll
+// };
 
 // Scroll right by 2 hours (4 slots), always align to the start of the hour
-const scrollRight = () => {
-  setVisibleStartIndex((prev) => {
-    const maxIndex = ALL_TIME_SLOTS.length - itemsPerPage;
-    let newIndex = Math.min(maxIndex, prev + itemsPerPage * 2);
-    updateRange(newIndex);
-    newIndex = newIndex - (newIndex % itemsPerPage);
-    return newIndex;
-  });
-  onTimeScroll("next"); // Trigger timeline scroll
-};
+// const scrollRight = () => {
+//   setVisibleStartIndex((prev) => {
+//     const maxIndex = ALL_TIME_SLOTS.length - itemsPerPage;
+//     let newIndex = Math.min(maxIndex, prev + itemsPerPage * 2);
+//     updateRange(newIndex);
+//     newIndex = newIndex - (newIndex % itemsPerPage);
+//     return newIndex;
+//   });
+//   onTimeScroll("next"); // Trigger timeline scroll
+// };
 
   const updateRange = (startIndex: number) => {
     const start = ALL_TIME_SLOTS[startIndex];
@@ -126,7 +128,7 @@ const scrollRight = () => {
 
   return (
     <div className="flex items-end bg-gray-500 text-white p-[2px] rounded w-full relative top-0 left-0 right-0 bottom-0">
-      <button onClick={scrollLeft} className="text-black py-4 bg-white rounded">
+      <button onClick={leftslide} className="text-black py-4 bg-white rounded">
         <ChevronLeft className="h-5 w-5" />
       </button>
       <div ref={scrollContainerRef} className="flex flex-1 overflow-hidden">
@@ -158,7 +160,7 @@ const scrollRight = () => {
         </div>
       </div>
       <button
-        onClick={scrollRight}
+        onClick={rightslide}
         className="text-black py-4 bg-white rounded"
       >
         <ChevronRight className="h-5 w-5" />

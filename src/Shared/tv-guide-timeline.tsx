@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
+// import { createRoot } from "react-dom/client";
 import { Timeline, type TimelineItem } from "vis-timeline/standalone";
 import type { TimelineTimeAxisScaleType } from "vis-timeline";
 import { DataSet } from "vis-data/peer";
@@ -16,9 +17,9 @@ import DateCarousel from "./carousel/date-carousel";
 import TimeCarousel from "./carousel/time-carousel";
 import { EditProgramForm } from "./EditProgramForm";
 import { cn } from "../lib/utlils";
-import TimelineItemContent from "./TimelineItem";
-import { createRoot, type Root } from "react-dom/client";
+
 import { NewProgramForm } from "./NewProgram";
+// import TimelineItemContent from "./TimelineItem";
 interface Channel {
   id: string;
   content: string;
@@ -41,8 +42,11 @@ export default function TvGuideTimeline() {
   const timelineInstance = useRef<Timeline | null>(null);
   const itemsDataSet = useRef<DataSet<Program> | null>(null);
   const groupsDataSet = useRef<DataSet<Channel> | null>(null);
+  // const itemRoots = useRef<Map<string | number, ReturnType<typeof createRoot>>>(new Map());
   // State for selected date and time from carousels
   const [selectedDate, setSelectedDate] = useState(new Date());
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [createItem, setCreateItem] = useState<Program | null>(null);
   const [selectedTime, setSelectedTime] = useState(
     new Date().toLocaleTimeString([], {
       hour: "2-digit",
@@ -123,7 +127,20 @@ export default function TvGuideTimeline() {
   const [selectedItem, setSelectedItem] = useState<Program | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isNewProgramDialogOpen, setIsNewProgramDialogOpen] = useState(false);
-  const itemRoots = useRef<Map<string | number, Root>>(new Map());
+  const [timelineStartTime, setTimelineStartTime] = useState(() => {
+    const now = new Date()
+    now.setMinutes(now.getMinutes() - 95, 0, 0) // 1 hour 35 minutes before
+    return now
+  })
+
+  
+  const [timelineEndTime, setTimelineEndTime] = useState(() => {
+    const now = new Date()
+    now.setMinutes(now.getMinutes() + 95, 0, 0) // 1 hour 35 minutes after (total 3h 10min)
+    return now
+  })
+
+
   // --- Navigation functions ---
   // const setTodayView = () => {
   //   if (timelineInstance.current) {
@@ -215,6 +232,8 @@ export default function TvGuideTimeline() {
       ...newProgram,
       type: "range",
     };
+    setCreateItem(program);
+    console.log(program)
     setItems((prevItems) => [...prevItems, program]);
   };
 
@@ -356,6 +375,45 @@ export default function TvGuideTimeline() {
       };
     }
   }, []);
+
+  const handleScrollLeft = useCallback(() => {
+    if (timelineInstance.current) {
+      const newStart = new Date(timelineStartTime)
+      newStart.setHours(newStart.getHours() - 2) // Move 2 hours back
+      const newEnd = new Date(timelineEndTime)
+      newEnd.setHours(newEnd.getHours() - 2)
+
+      setTimelineStartTime(newStart)
+      setTimelineEndTime(newEnd)
+      setSelectedTime(getFormattedTimeSlot(newStart)) // Use helper for alignment
+
+      timelineInstance.current.setWindow(newStart, newEnd, {
+        animation: true,
+        // duration: 300,
+        // easingFunction: "easeOutQuad",
+      })
+    }
+  }, [timelineStartTime, timelineEndTime, getFormattedTimeSlot])
+
+  const handleScrollRight = useCallback(() => {
+    if (timelineInstance.current) {
+      const newStart = new Date(timelineStartTime)
+      newStart.setHours(newStart.getHours() + 2) // Move 2 hours forward
+      const newEnd = new Date(timelineEndTime)
+      newEnd.setHours(newEnd.getHours() + 2)
+
+      setTimelineStartTime(newStart)
+      setTimelineEndTime(newEnd)
+      setSelectedTime(getFormattedTimeSlot(newStart)) // Use helper for alignment
+
+      timelineInstance.current.setWindow(newStart, newEnd, {
+        animation: true,
+        // duration: 300,
+        // easingFunction: "easeOutQuad",
+      })
+    }
+  }, [timelineStartTime, timelineEndTime, getFormattedTimeSlot])
+
   // --- Main Effect for Timeline Initialization (runs ONLY ONCE) ---
   useEffect(() => {
     if (timelineRef.current && !timelineInstance.current) {
@@ -418,65 +476,63 @@ export default function TvGuideTimeline() {
         // UPDATED: Display start and end times on the program bar
         template: (item: Program) => {
           if (!item) return "";
-          // const startTime =
-          //   item.start instanceof Date && !isNaN(item.start.getTime())
-          //     ? item.start.toLocaleTimeString([], {
-          //         hour: "2-digit",
-          //         minute: "2-digit",
-          //       })
-          //     : "Invalid Time";
-          // const endTime =
-          //   item.end instanceof Date && !isNaN(item.end.getTime())
-          //     ? item.end.toLocaleTimeString([], {
-          //         hour: "2-digit",
-          //         minute: "2-digit",
-          //       })
-          //     : "Invalid Time";
+          
+          const startTime =
+            item.start instanceof Date && !isNaN(item.start.getTime())
+              ? item.start.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "Invalid Time";
+          const endTime =
+            item.end instanceof Date && !isNaN(item.end.getTime())
+              ? item.end.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "Invalid Time";
 
-          // const programItem = itemsRef.current.find(
-          //   (p) => String(p.id) === String(item.id)
-          // );
-          // if (!programItem) return "";
-
-          // const container = document.createElement("div");
-          // container.className =
-          //   "w-full h-full flex items-center justify-center"; // Basic styling for the container
-
-          // // Create a React root and render the component
-          // let root = itemRoots.current.get(item.id);
-          // if (!root) {
-          //   root = createRoot(container);
-          //   itemRoots.current.set(item.id, root);
-          // }
-          // root.render(<TimelineItemContent program={item} />);
-
-          // return container;
-
-             return `
-            // This method is correct and confirmed.
-            <div class="p-1 text-sm font-medium overflow-hidden whitespace-nowrap text-ellipsis" id="timeline-item-${item.id}"></div>
-            <script>
-              (function() {
-                // Wait for React to be available and the DOM to be ready
-                if (window.React && window.ReactDOM && document.getElementById("timeline-item-${item.id}")) {
-                  const container = document.getElementById("timeline-item-${item.id}");
-                  // Remove any previous content
-                  while (container.firstChild) container.removeChild(container.firstChild);
-                  // Render the React component into the container
-                  window.ReactDOM.createRoot
-                    ? window.ReactDOM.createRoot(container).render(window.React.createElement(window.TimelineItemContent, { program: item }))
-                    : window.ReactDOM.render(window.React.createElement(window.TimelineItemContent, { program: item }), container);
-                }
-              })();
-            </script>
+          // Use HTML template instead of React component for better compatibility with vis.js
+          return `
+            <div class="flex h-full w-full items-center gap-2 overflow-hidden p-1">
+              ${item.imageUrl ? `
+                <div class="flex-shrink-0">
+                  <img
+                    src="${item.imageUrl}"
+                    alt="${item.content || 'Program image'}"
+                    width="40"
+                    height="40"
+                    class="h-10 w-10 rounded object-cover"
+                  />
+                </div>
+              ` : ''}
+              <div class="flex min-w-0 flex-col justify-center">
+                <div class="text-sm font-medium leading-tight text-gray-900 line-clamp-1">${item.content}</div>
+                <div class="text-xs text-gray-500">
+                  ${startTime} - ${endTime}
+                </div>
+                ${item.description ? `<div class="text-xs text-gray-600 line-clamp-2">${item.description}</div>` : ''}
+              </div>
+            </div>
           `;
 
-          // return `
-          //   <div class="p-1 text-sm font-medium overflow-hidden whitespace-nowrap text-ellipsis">
-          //     ${item.content}
-          //     <div class="text-xs text-gray-500">${startTime} - ${endTime}</div>
-          //   </div>
-          // `;
+
+          // const programItem = itemsRef.current.find((p) => String(p.id) === String(item.id))
+          // if (!programItem) return ""
+
+          // const container = document.createElement("div")
+          // container.className = "p-0" // Basic styling for the container
+
+          // // Create a React root and render the component
+          // let root = itemRoots.current.get(programItem.id)
+          // if (!root) {
+          //   root = createRoot(container)
+          //   itemRoots.current.set(programItem.id, root)
+          // }
+          // root.render(<TimelineItemContent program={programItem} />)
+
+          // return container
+
         },
 
         groupTemplate: (group: Channel) => {
@@ -498,33 +554,24 @@ export default function TvGuideTimeline() {
           item: TimelineItem,
           callback: (item: TimelineItem | null) => void
         ) => {
-          const newContent = setIsNewProgramDialogOpen(true);
-          if (newContent !== null && item.group) {
+          // setIsNewProgramDialogOpen(true);
+          if (item.group) {
             const newProgram: Program = {
               id: (Math.random() * 1e9).toFixed(0),
-              content: "New Program",
+              content: createItem?.content || "program",
               start: new Date(item.start),
               end: item.end
                 ? new Date(item.end)
                 : new Date(new Date(item.start).getTime() + 3600000),
               group: String(item.group),
               type: "range",
-              imageUrl: "/placeholder.svg?height=40&width=60", // Default image
-              description: "Enter a description for this new program.", // Default description
+              imageUrl: createItem?.imageUrl, //"http://localhost:5173/src/assets/usa-network.png" Default image
+              description: createItem?.description //"Enter a description for this new program." Default description
             };
             setItems((prevItems) => [...prevItems, newProgram]);
 
             // Immediately set the new program as selected and open the edit dialog
             setSelectedItem(newProgram);
-            // setIsNewProgramDialogOpen(true);
-
-            // Render the React component for the new item
-            const container = document.createElement("div");
-            container.className =
-              "w-full h-full flex items-center justify-center";
-            const root = createRoot(container);
-            itemRoots.current.set(newProgram.id, root);
-            root.render(<TimelineItemContent program={newProgram} />);
 
             callback(newProgram);
           } else {
@@ -791,7 +838,22 @@ export default function TvGuideTimeline() {
         onSelectDate={handleSelectDate}
         selectedDate={selectedDate}
       />
-
+{/* <div className="flex gap-2 mb-2">
+        <button
+          onClick={handleScrollLeft}
+          disabled={!isTimelineReady}
+          className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+        >
+          ← Scroll 2h Left
+        </button>
+        <button
+          onClick={handleScrollRight}
+          disabled={!isTimelineReady}
+          className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+        >
+          Scroll 2h Right →
+        </button>
+      </div> */}
       {/* Custom Time Carousel */}
       <div className="flex items-center bg-gray-800 text-white px-1 rounded-b-lg mb-4 time-carousel-container gap-1">
         <div className="bg-white p-2">
@@ -812,6 +874,8 @@ export default function TvGuideTimeline() {
           selectedTime={selectedTime}
           onRangeChange={handleTimeRangeChange}
           onTimeScroll={onTimeScroll} // Pass onTimeScroll function
+          leftslide={handleScrollLeft}
+          rightslide={handleScrollRight}
         />
       </div>
       <div ref={timelineRef} className="h-screen -mt-3" />

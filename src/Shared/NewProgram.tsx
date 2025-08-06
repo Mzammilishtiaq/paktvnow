@@ -24,14 +24,10 @@ interface NewProgramFormProps {
 export function NewProgramForm({ program, channels, onSave,onCancel }: NewProgramFormProps) {
   const [formData, setFormData] = useState({
     content: "New Program",
-    start:
-    program.start instanceof Date && !isNaN(program.start.getTime())
-      ? program.start.toISOString().slice(0, 16)
-      : "",
-  end:
-    program.end instanceof Date && !isNaN(program.end.getTime())
-      ? program.end.toISOString().slice(0, 16)
-      : "",
+    start: new Date(program.start).toISOString().slice(0, 16),
+    end: program.end
+      ? new Date(program.end).toISOString().slice(0, 16)
+      : new Date(new Date(program.start).getTime() + 3600000).toISOString().slice(0, 16),
     group: program.group,
     imageUrl: "",
     description: "",
@@ -45,20 +41,10 @@ export function NewProgramForm({ program, channels, onSave,onCancel }: NewProgra
     // Update form data if initial props change (e.g., if dialog is reused)
     setFormData({
       content: "New Program",
-      start:
-        program.start instanceof Date && !isNaN(program.start.getTime())
-          ? program.start.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "Invalid Time",
-      end:
-        program.end instanceof Date && !isNaN(program.end.getTime())
-          ? program.end.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "Invalid Time",
+      start: new Date(program.start).toISOString().slice(0, 16),
+      end: program.end
+        ? new Date(program.end).toISOString().slice(0, 16)
+        : new Date(new Date(program.start).getTime() + 3600000).toISOString().slice(0, 16),
       group: program.group,
       imageUrl: "",
       description: "",
@@ -179,7 +165,7 @@ export function NewProgramForm({ program, channels, onSave,onCancel }: NewProgra
         </div>
 
         {/* Start Time */}
-        {/* <div className="grid grid-cols-4 items-start gap-4">
+        <div className="grid grid-cols-4 items-start gap-4">
           <label htmlFor="start" className="text-right text-sm font-medium text-gray-700 pt-2">
             Start Time
           </label>
@@ -198,10 +184,10 @@ export function NewProgramForm({ program, channels, onSave,onCancel }: NewProgra
             />
             {errors.start && <p className="mt-1 text-sm text-red-600">{errors.start}</p>}
           </div>
-        </div> */}
+        </div>
 
         {/* End Time */}
-        {/* <div className="grid grid-cols-4 items-start gap-4">
+        <div className="grid grid-cols-4 items-start gap-4">
           <label htmlFor="end" className="text-right text-sm font-medium text-gray-700 pt-2">
             End Time
           </label>
@@ -220,7 +206,7 @@ export function NewProgramForm({ program, channels, onSave,onCancel }: NewProgra
             />
             {errors.end && <p className="mt-1 text-sm text-red-600">{errors.end}</p>}
           </div>
-        </div> */}
+        </div>
 
         {/* Channel Selection */}
         <div className="grid grid-cols-4 items-start gap-4">
