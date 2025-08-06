@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 interface Program {
   id: string | number
   group: string
@@ -15,7 +15,7 @@ interface TimelineItemContentProps {
 }
 
 export default function TimelineItemContent({ program }: TimelineItemContentProps) {
-  const [isHovered, setIsHovered] = useState(false)
+  const [isHovered, setIsHovered] = React.useState(false)
   
   const startTime =
     program.start instanceof Date && !isNaN(program.start.getTime())
