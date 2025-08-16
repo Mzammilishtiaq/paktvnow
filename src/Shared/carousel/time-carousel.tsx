@@ -1,6 +1,6 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "../../lib/utils";
+import { cn } from "../../lib/utlils";
 interface TimeCarouselProps {
   // onCurrentTime: (time: string) => void
   selectedTime: string; // e.g., "11:00 AM"
