@@ -21,7 +21,7 @@ const ReusableDialog: React.FC<ReusableDialogProps> = ({
 }) => {
   return (
     <Dialog open={open} onClose={onClose}>
-      {title && <DialogTitle>{title}</DialogTitle>}
+      {title && <DialogTitle className="!text-2xl">{title}</DialogTitle>}
       <DialogContent>{children}</DialogContent>
       {actions && <DialogActions>{actions}</DialogActions>}
     </Dialog>
