@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
-
+import type {Program,Channel} from '../types/interface'
 // Separate component for the edit form within the dialog
 interface EditProgramFormProps {
     program: Program;
     channels: Channel[];
     onSave: (updatedProgram: Program) => void;
   }
-  interface Channel {
-    id: string;
-    content: string;
-    logo?: string;
-  }
-  interface Program {
-    id: string | number; // Change the type here to allow both string and number
-    group: string;
-    content: string;
-    start: Date;
-    end: Date;
-    type: "range";
-  }
+  // interface Channel {
+  //   id: string;
+  //   content: string;
+  //   logo?: string;
+  // }
+  // interface Program {
+  //   id: string | number; // Change the type here to allow both string and number
+  //   group: string;
+  //   content: string;
+  //   start: Date;
+  //   end: Date;
+  //   type: "range";
+  // }
   
   export function EditProgramForm({ program, channels, onSave }: EditProgramFormProps) {
     const [formData, setFormData] = useState({

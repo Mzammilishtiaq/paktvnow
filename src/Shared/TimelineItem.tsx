@@ -1,36 +1,31 @@
 import React from 'react'
-interface Program {
-  id: string | number
-  group: string
-  content: string
-  start: Date
-  end: Date
-  type: "range"
-  imageUrl?: string
-  description?: string
-}
+import type {Program} from '../types/interface'
+
 
 interface TimelineItemContentProps {
   program: Program
+  startTime:Date;
+  endTime:Date;
 }
 
-export default function TimelineItemContent({ program }: TimelineItemContentProps) {
+export default function TimelineItemContent({ program,endTime,startTime }: TimelineItemContentProps) {
   const [isHovered, setIsHovered] = React.useState(false)
-  
-  const startTime =
-    program.start instanceof Date && !isNaN(program.start.getTime())
-      ? program.start.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "Invalid Time"
-  const endTime =
-    program.end instanceof Date && !isNaN(program.end.getTime())
-      ? program.end.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "Invalid Time"
+  const formattedStartTime = startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  const formattedEndTime = endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  // const startTime =
+  //   program.start instanceof Date && !isNaN(program.start.getTime())
+  //     ? program.start.toLocaleTimeString([], {
+  //         hour: "2-digit",
+  //         minute: "2-digit",
+  //       })
+  //     : "Invalid Time"
+  // const endTime =
+  //   program.end instanceof Date && !isNaN(program.end.getTime())
+  //     ? program.end.toLocaleTimeString([], {
+  //         hour: "2-digit",
+  //         minute: "2-digit",
+  //       })
+  //     : "Invalid Time"
 
   return (
     <div 
@@ -54,7 +49,7 @@ export default function TimelineItemContent({ program }: TimelineItemContentProp
       <div className="flex flex-col justify-center border-l-4 border-gray-900 h-25 pl-2 gap-y-3">
         <div className="text-sm font-medium leading-tight text-gray-900 line-clamp-1">{program.content}</div>
         <div className="text-xs text-gray-500">
-          {startTime} - {endTime}
+          {formattedStartTime} - {formattedEndTime}
         </div>
         {program.description && <div className="text-xs text-gray-600 line-clamp-2">{program.description}</div>}
       </div>
