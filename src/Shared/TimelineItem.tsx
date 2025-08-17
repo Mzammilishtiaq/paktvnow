@@ -8,7 +8,7 @@ interface TimelineItemContentProps {
   endTime:Date;
 }
 
-export default function TimelineItemContent({ program,endTime,startTime }: TimelineItemContentProps) {
+export default function TimelineItemContent({ program,endTime,startTime}: TimelineItemContentProps) {
   const [isHovered, setIsHovered] = React.useState(false)
   const formattedStartTime = startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   const formattedEndTime = endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })

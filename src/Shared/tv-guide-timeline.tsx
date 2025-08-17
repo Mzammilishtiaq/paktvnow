@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
-import { createRoot } from "react-dom/client";
+// import { createRoot } from "react-dom/client";
 import { Timeline, type TimelineItem } from "vis-timeline/standalone";
 import type { TimelineTimeAxisScaleType } from "vis-timeline";
 import { DataSet } from "vis-data/peer";
@@ -19,15 +19,15 @@ import { EditProgramForm } from "./EditProgramForm";
 import { cn } from "../lib/utlils";
 import type {Channel,Program} from '../types/interface'
 import { NewProgram } from "./NewProgram";
-import type { Root } from "react-dom/client";
-import TimelineItemContent from "./TimelineItem";
+// import type { Root } from "react-dom/client";
+// import TimelineItemContent from "./TimelineItem";
 
 export default function TvGuideTimeline() {
   const timelineRef = useRef<HTMLDivElement>(null);
   const timelineInstance = useRef<Timeline | null>(null);
   const itemsDataSet = useRef<DataSet<Program> | null>(null);
   const groupsDataSet = useRef<DataSet<Channel> | null>(null);
-  const itemRoots = useRef<Map<string | number, Root>>(new Map()); // Map to store React roots for items
+  // const itemRoots = useRef<Map<string | number, Root>>(new Map()); // Map to store React roots for items
   // State for selected date and time from carousels
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(
@@ -498,50 +498,50 @@ export default function TvGuideTimeline() {
                   minute: "2-digit",
                 })
               : "Invalid Time";
-              const startDateObj = new Date(startTime as string | number)
-              const endDateObj = new Date(endTime as string | number)
+              // const startDateObj = new Date(startTime as string | number)
+              // const endDateObj = new Date(endTime as string | number)
               
 
           // Use HTML template instead of React component for better compatibility with vis.js
-          // return `
-          //   <div class="flex h-full w-full items-center gap-2 overflow-hidden p-1">
-          //     ${item.imageUrl ? `
-          //       <div class="flex-shrink-0">
-          //         <img
-          //           src="${item.imageUrl}"
-          //           alt="${item.content || 'Program image'}"
-          //           width="40"
-          //           height="40"
-          //           class="h-10 w-10 rounded object-cover"
-          //         />
-          //       </div>
-          //     ` : ''}
-          //     <div class="flex min-w-0 flex-col justify-center">
-          //       <div class="text-sm font-medium leading-tight text-gray-900 line-clamp-1">${item.content}</div>
-          //       <div class="text-xs text-gray-500">
-          //         ${startTime} - ${endTime}
-          //       </div>
-          //       ${item.description ? `<div class="text-xs text-gray-600 line-clamp-2">${item.description}</div>` : ''}
-          //     </div>
-          //   </div>
-          // `;
+          return `
+            <div class="Timelineitem-container">
+              ${item.imageUrl ? `
+                <div class="flex-shrink-0">
+                  <img
+                    src="${item.imageUrl}"
+                    alt="${item.content || 'Program image'}"
+                    width="40"
+                    height="40"
+                    class="h-10 w-10 rounded object-cover"
+                  />
+                </div>
+              ` : ''}
+              <div class="flex min-w-0 flex-col justify-center">
+                <div class="text-sm font-medium leading-tight text-gray-900 line-clamp-1">${item.content}</div>
+                <div class="text-xs text-gray-500">
+                  ${startTime} - ${endTime}
+                </div>
+                ${item.description ? `<div class="text-xs text-gray-600 line-clamp-2">${item.description}</div>` : ''}
+              </div>
+            </div>
+              `;
 
 
-          const programItem = itemsRef.current.find((p) => String(p.id) === String(item.id))
-          if (!programItem) return ""
+          // const programItem = itemsRef.current.find((p) => String(p.id) === String(item.id))
+          // if (!programItem) return ""
 
-          const container = document.createElement("div")
-          container.className = "p-0" // Basic styling for the container
+          // const container = document.createElement("div")
+          // container.className = "p-0" // Basic styling for the container
 
-          // Create a React root and render the component
-          let root = itemRoots.current.get(programItem.id)
-          if (!root) {
-            root = createRoot(container)
-            itemRoots.current.set(programItem.id, root)
-          }
-          root.render(<TimelineItemContent program={programItem} endTime={endDateObj} startTime={startDateObj} key={programItem.id} />)
+          // // Create a React root and render the component
+          // let root = itemRoots.current.get(programItem.id)
+          // if (!root) {
+          //   root = createRoot(container)
+          //   itemRoots.current.set(programItem.id, root)
+          // }
+          // root.render(<TimelineItemContent program={programItem} endTime={endDateObj} startTime={startDateObj} key={programItem.id} />)
 
-          return container
+          // return container
 
         },
 
@@ -884,6 +884,7 @@ export default function TvGuideTimeline() {
             program={selectedItem}
             channels={groups}
             onSave={handleSaveEdit}
+            onCancel={()=>setIsEditDialogOpen(false)}
           />
         </ReusableDialog>
       )}
