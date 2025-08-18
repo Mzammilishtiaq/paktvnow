@@ -1,98 +1,104 @@
 import { useEffect, useState } from "react";
-import type {Program,Channel} from '../types/interface'
+import type { Program, Channel } from "../types/interface";
 import { cn } from "../lib/utlils";
+import {toDatetimeLocalValue} from '../lib/dateTime'
 // Separate component for the edit form within the dialog
 interface EditProgramFormProps {
-    program: Program;
-    channels: Channel[];
-    onSave: (updatedProgram: Program) => void;
-    onCancel:()=>void;
-  }
+  program: Program;
+  channels: Channel[];
+  onSave: (updatedProgram: Program) => void;
+  onCancel: () => void;
+}
 
-  
-  export function EditProgramForm({ program, channels, onSave,onCancel }: EditProgramFormProps) {
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    // const [selectedFile, setSelectedFile] = useState<File | null>(null);
+export function EditProgramForm({
+  program,
+  channels,
+  onSave,
+  onCancel,
+}: EditProgramFormProps) {
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  // const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imageUrlPreview, setImageUrlPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-    const [formData, setFormData] = useState({
-      content: program.content,
-      start:
-        program.start instanceof Date && !isNaN(program.start.getTime())
-          ? program.start.toISOString().slice(0, 16)
-          : "",
-      end:
-        program.end instanceof Date && !isNaN(program.end.getTime())
-          ? program.end.toISOString().slice(0, 16)
-          : "",
-      group: program.group,
-      imageUrl:"",
-      description:""
-    });
-  
-    const handleChange = (
-      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement| HTMLTextAreaElement>
-    ) => {
-      const { name, value } = e.target;
-      setFormData((prev) => ({ ...prev, [name]: value }));
-      if (errors[name]) {
-        setErrors((prev) => ({ ...prev, [name]: "" }));
-      }
-    };
-  
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      setIsSubmitting(true);
-      // Ensure start and end times are valid
-      const startDate = new Date(formData.start);
-      const endDate = new Date(formData.end);
-  
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        alert("Please provide valid start and end times.");
-        return;
-      }
-  
-      const updatedProgram: Program = {
-        ...program,
-        content: formData.content,
-        start: startDate,
-        end: endDate,
-        group: formData.group,
-        imageUrl: imageUrlPreview || formData.imageUrl.trim() || undefined,
-        description: formData.description.trim() || undefined,
-      };
-  
-      onSave(updatedProgram);
-    };
+  const [formData, setFormData] = useState({
+    content: program.content,
+    start:
+      program.start instanceof Date && !isNaN(program.start.getTime())
+        ? toDatetimeLocalValue(program.start)
+        : "",
+    end:
+      program.end instanceof Date && !isNaN(program.end.getTime())
+        ? toDatetimeLocalValue(program.end)
+        : "",
+    group: program.group,
+    imageUrl: program.imageUrl,
+    description:program.description,
+  });
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImageUrlPreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        setImageUrlPreview(null);
-      }
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    // Ensure start and end times are valid
+    const startDate = new Date(formData.start);
+    const endDate = new Date(formData.end);
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      alert("Please provide valid start and end times.");
+      return;
+    }
+
+    const updatedProgram: Program = {
+      ...program,
+      content: formData.content,
+      start: startDate,
+      end: endDate,
+      group: formData.group,
+      imageUrl: imageUrlPreview || (formData.imageUrl ? formData.imageUrl.trim() : undefined),
+    description: formData.description ? formData.description.trim() : undefined,
     };
-    useEffect(() => {
-      if (program) {
-        setFormData({
-          content: program.content,
-          start: program.start.toISOString().slice(0, 16),  // Format for datetime-local input
-          end: program.end.toISOString().slice(0, 16),
-          group: program.group,
-          imageUrl: "",
-          description: "",
-        });
-      }
-    }, [program]);  // Whenever the program changes, update the form data
-    
-  
-    return (
-<div className="bg-white p-0 rounded-lg">
+    console.log("updatedProgram======>", updatedProgram);
+    onSave(updatedProgram);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageUrlPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImageUrlPreview(null);
+    }
+  };
+  useEffect(() => {
+    if (program) {
+      setFormData({
+        content: program.content,
+        start: toDatetimeLocalValue(program.start), // Format for datetime-local input
+        end: toDatetimeLocalValue(program.end),
+        group: program.group,
+        imageUrl: program.imageUrl || "Edit",
+        description:program.description || "Edit description",
+      });
+    }
+  }, [program]); // Whenever the program changes, update the form data
+
+  return (
+    <div className="bg-white p-0 rounded-lg">
       <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
         {/* progran and description  */}
         <div className="flex space-x-3">
@@ -229,10 +235,11 @@ interface EditProgramFormProps {
               onChange={handleFileChange}
               className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
-            {imageUrlPreview && (
+            {/* imageUrlPreview &&  */}
+            {formData.imageUrl && (
               <div className="mt-2">
                 <img
-                  src={imageUrlPreview || "/placeholder.svg"}
+                  src={formData.imageUrl}
                   alt={formData.content}
                   className="h-20 w-20 object-fill rounded"
                 />
@@ -291,5 +298,5 @@ interface EditProgramFormProps {
         </div>
       </form>
     </div>
-    );
-  }
+  );
+}

@@ -17,7 +17,7 @@ import DateCarousel from "./carousel/date-carousel";
 import TimeCarousel from "./carousel/time-carousel";
 import { EditProgramForm } from "./EditProgramForm";
 import { cn } from "../lib/utlils";
-import type {Channel,Program} from '../types/interface'
+import type { Channel, Program } from "../types/interface";
 import { NewProgram } from "./NewProgram";
 // import type { Root } from "react-dom/client";
 // import TimelineItemContent from "./TimelineItem";
@@ -93,7 +93,7 @@ export default function TvGuideTimeline() {
       imageUrl: "/placeholder.svg?height=40&width=60",
       description: "Blockbuster movie of the week.",
     },
-  ])
+  ]);
 
   // Add a ref to always have the latest items
   const itemsRef = useRef(items);
@@ -115,19 +115,18 @@ export default function TvGuideTimeline() {
   const [selectedItem, setSelectedItem] = useState<Program | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isNewProgramDialogOpen, setIsNewProgramDialogOpen] = useState(false);
+  const [goLiveRed, setGoLiveRed] = useState(false);
   const [timelineStartTime, setTimelineStartTime] = useState(() => {
-    const now = new Date()
-    now.setMinutes(now.getMinutes() - 95, 0, 0) // 1 hour 35 minutes before
-    return now
-  })
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - 95, 0, 0); // 1 hour 35 minutes before
+    return now;
+  });
 
-  
   const [timelineEndTime, setTimelineEndTime] = useState(() => {
-    const now = new Date()
-    now.setMinutes(now.getMinutes() + 95, 0, 0) // 1 hour 35 minutes after (total 3h 10min)
-    return now
-  })
-
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 95, 0, 0); // 1 hour 35 minutes after (total 3h 10min)
+    return now;
+  });
 
   // --- Navigation functions ---
   // const setTodayView = () => {
@@ -203,6 +202,10 @@ export default function TvGuideTimeline() {
         item.id === updatedProgram.id ? updatedProgram : item
       )
     );
+    timelineInstance.current?.setWindow(
+      new Date(updatedProgram.start.getTime() - 30 * 60 * 1000),
+      new Date(updatedProgram.start.getTime() + 90 * 60 * 1000)
+    );
     setSelectedItem(null); // Clear selection after saving
     setIsEditDialogOpen(false);
   };
@@ -220,16 +223,16 @@ export default function TvGuideTimeline() {
         type: "range",
         ...newProgramData,
       };
-  
+
       setItems((prevItems) => [...prevItems, newProgram]);
       itemsDataSet.current?.add(newProgram);
-  
+
       // Optional: bring into view
       timelineInstance.current?.setWindow(
         new Date(newProgram.start.getTime() - 30 * 60 * 1000),
         new Date(newProgram.start.getTime() + 90 * 60 * 1000)
       );
-  
+
       if (addCallbackRef.current) {
         addCallbackRef.current(newProgram);
         addCallbackRef.current = null;
@@ -237,12 +240,11 @@ export default function TvGuideTimeline() {
       // Close dialog
       setIsNewProgramDialogOpen(false);
       setNewProgramInitialData(null);
-  
+
       console.log(newProgram);
     },
     [setItems, itemsDataSet, timelineInstance, addCallbackRef] // include refs or setters if used
   );
-  
 
   // Helper to get a time string aligned to 30-minute intervals
   const getFormattedTimeSlot = useCallback((date: Date) => {
@@ -385,42 +387,63 @@ export default function TvGuideTimeline() {
 
   const handleScrollLeft = useCallback(() => {
     if (timelineInstance.current) {
-      const newStart = new Date(timelineStartTime)
-      newStart.setHours(newStart.getHours() - 2) // Move 2 hours back
-      const newEnd = new Date(timelineEndTime)
-      newEnd.setHours(newEnd.getHours() - 2)
+      const newStart = new Date(timelineStartTime);
+      newStart.setHours(newStart.getHours() - 1); // Move 2 hours back
+      const newEnd = new Date(timelineEndTime);
+      newEnd.setHours(newEnd.getHours() - 1);
 
-      setTimelineStartTime(newStart)
-      setTimelineEndTime(newEnd)
-      setSelectedTime(getFormattedTimeSlot(newStart)) // Use helper for alignment
+      setTimelineStartTime(newStart);
+      setTimelineEndTime(newEnd);
+      setSelectedTime(getFormattedTimeSlot(newStart)); // Use helper for alignment
 
       timelineInstance.current.setWindow(newStart, newEnd, {
         animation: true,
         // duration: 300,
         // easingFunction: "easeOutQuad",
-      })
+      });
     }
-  }, [timelineStartTime, timelineEndTime, getFormattedTimeSlot])
+  }, [timelineStartTime, timelineEndTime, getFormattedTimeSlot]);
 
   const handleScrollRight = useCallback(() => {
     if (timelineInstance.current) {
-      const newStart = new Date(timelineStartTime)
-      newStart.setHours(newStart.getHours() + 2) // Move 2 hours forward
-      const newEnd = new Date(timelineEndTime)
-      newEnd.setHours(newEnd.getHours() + 2)
+      const newStart = new Date(timelineStartTime);
+      newStart.setHours(newStart.getHours() + 1); // Move 1 hours forward
+      const newEnd = new Date(timelineEndTime);
+      newEnd.setHours(newEnd.getHours() + 1);
 
-      setTimelineStartTime(newStart)
-      setTimelineEndTime(newEnd)
-      setSelectedTime(getFormattedTimeSlot(newStart)) // Use helper for alignment
+      setTimelineStartTime(newStart);
+      setTimelineEndTime(newEnd);
+      setSelectedTime(getFormattedTimeSlot(newStart)); // Use helper for alignment
 
       timelineInstance.current.setWindow(newStart, newEnd, {
         animation: true,
         // duration: 300,
         // easingFunction: "easeOutQuad",
-      })
+      });
     }
-  }, [timelineStartTime, timelineEndTime, getFormattedTimeSlot])
+  }, [timelineStartTime, timelineEndTime, getFormattedTimeSlot]);
+  useEffect(() => {
+    // if (timelineRef.current) {
+    //   timelineInstance.current = new Timeline(timelineRef.current, items, options);
+    // }
 
+    const checkCurrentTime = () => {
+      if (!timelineInstance.current) return;
+
+      const range = timelineInstance.current.getWindow(); // {start: Date, end: Date}
+      const now = new Date();
+
+      // If current time is outside the visible window
+      if (now < range.start || now > range.end) {
+        setGoLiveRed(true);
+      } else {
+        setGoLiveRed(false);
+      }
+    };
+
+    const interval = setInterval(checkCurrentTime, 1000); // check every second
+    return () => clearInterval(interval);
+  }, []);
   // --- Main Effect for Timeline Initialization (runs ONLY ONCE) ---
   useEffect(() => {
     if (timelineRef.current && !timelineInstance.current) {
@@ -439,7 +462,7 @@ export default function TvGuideTimeline() {
         orientation: "top",
         stack: false,
         zoomable: false,
-        moveable: true,
+        moveable: false,
         // Disable zoom functionality by not setting zoomMax and zoomMin
         zoomMax: 1000 * 60 * 60 * 6, // Disable zooming to maximum
         zoomMin: 1000 * 60 * 30, // Disable zooming to minimum
@@ -483,7 +506,7 @@ export default function TvGuideTimeline() {
         // UPDATED: Display start and end times on the program bar
         template: (item: Program) => {
           if (!item) return "";
-          
+
           const startTime =
             item.start instanceof Date && !isNaN(item.start.getTime())
               ? item.start.toLocaleTimeString([], {
@@ -498,34 +521,42 @@ export default function TvGuideTimeline() {
                   minute: "2-digit",
                 })
               : "Invalid Time";
-              // const startDateObj = new Date(startTime as string | number)
-              // const endDateObj = new Date(endTime as string | number)
-              
+          // const startDateObj = new Date(startTime as string | number)
+          // const endDateObj = new Date(endTime as string | number)
 
           // Use HTML template instead of React component for better compatibility with vis.js
           return `
             <div class="Timelineitem-container">
-              ${item.imageUrl ? `
+              ${
+                item.imageUrl
+                  ? `
                 <div class="flex-shrink-0">
                   <img
                     src="${item.imageUrl}"
-                    alt="${item.content || 'Program image'}"
+                    alt="${item.content || "Program image"}"
                     width="40"
                     height="40"
                     class="h-10 w-10 rounded object-cover"
                   />
                 </div>
-              ` : ''}
+              `
+                  : ""
+              }
               <div class="flex min-w-0 flex-col justify-center">
-                <div class="text-sm font-medium leading-tight text-gray-900 line-clamp-1">${item.content}</div>
+                <div class="text-sm font-medium leading-tight text-gray-900 line-clamp-1">${
+                  item.content
+                }</div>
                 <div class="text-xs text-gray-500">
                   ${startTime} - ${endTime}
                 </div>
-                ${item.description ? `<div class="text-xs text-gray-600 line-clamp-2">${item.description}</div>` : ''}
+                ${
+                  item.description
+                    ? `<div class="text-xs text-gray-600 line-clamp-2">${item.description}</div>`
+                    : ""
+                }
               </div>
             </div>
               `;
-
 
           // const programItem = itemsRef.current.find((p) => String(p.id) === String(item.id))
           // if (!programItem) return ""
@@ -542,7 +573,6 @@ export default function TvGuideTimeline() {
           // root.render(<TimelineItemContent program={programItem} endTime={endDateObj} startTime={startDateObj} key={programItem.id} />)
 
           // return container
-
         },
 
         groupTemplate: (group: Channel) => {
@@ -721,6 +751,7 @@ export default function TvGuideTimeline() {
         if (properties.item) {
           const selectedId = properties.item;
           const item = itemsRef.current.find((i) => i.id === selectedId);
+          console.log("updatedProgram douvleclick====>",item)
           if (item) {
             setSelectedItem(item);
             setIsEditDialogOpen(true);
@@ -846,7 +877,6 @@ export default function TvGuideTimeline() {
   };
   return (
     <div className="w-full h-[100vh] py-2  px-1 bg-gray-100">
-     
       <DateCarousel
         onSelectDate={handleSelectDate}
         selectedDate={selectedDate}
@@ -854,15 +884,16 @@ export default function TvGuideTimeline() {
 
       {/* Custom Time Carousel */}
       <div className="flex items-center bg-gray-800 text-white px-1 rounded-b-lg mb-4 time-carousel-container gap-1">
-        <div className="bg-white p-2">
+        <div className="bg-white px-2 h-12 flex justify-center items-center">
           <button
             onClick={handleGoLive}
             className={cn(
-              "bg-gray-500 hover:bg-gray-500 text-white flex items-center justify-center gap-x-1 w-[80px]"
+              " text-white flex items-center justify-center gap-x-2 w-[100px] h-8",
+              goLiveRed ? "bg-red-500" : "bg-gray-500"
             )}
           >
-            <div className={cn("h-2 w-2 rounded-full bg-white")} />
-            <span className="text-sm font-medium">Go Live</span>
+            <div className={cn("h-3 w-3 rounded-full bg-white")} />
+            <span className="text-[18px] font-medium">Go Live</span>
           </button>
         </div>
         <TimeCarousel
@@ -884,34 +915,34 @@ export default function TvGuideTimeline() {
             program={selectedItem}
             channels={groups}
             onSave={handleSaveEdit}
-            onCancel={()=>setIsEditDialogOpen(false)}
+            onCancel={() => setIsEditDialogOpen(false)}
           />
         </ReusableDialog>
       )}
       {isNewProgramDialogOpen && newProgramInitialData && (
-  <ReusableDialog
-    open={isNewProgramDialogOpen}
-    onClose={() => {
-      setIsNewProgramDialogOpen(false);
-      setNewProgramInitialData(null);
-    }}
-    title="New Program"
-  >
-    <NewProgram
-      newProgram={newProgramInitialData}
-      channels={groups}
-      onSave={handleCreateNewProgram}
-      onCancel={() => {
-        setIsNewProgramDialogOpen(false);
-        setNewProgramInitialData(null);
-        if (addCallbackRef.current) {
-          addCallbackRef.current(null);
-          addCallbackRef.current = null;
-        }
-      }}
-    />
-  </ReusableDialog>
-)}
+        <ReusableDialog
+          open={isNewProgramDialogOpen}
+          onClose={() => {
+            setIsNewProgramDialogOpen(false);
+            setNewProgramInitialData(null);
+          }}
+          title="New Program"
+        >
+          <NewProgram
+            newProgram={newProgramInitialData}
+            channels={groups}
+            onSave={handleCreateNewProgram}
+            onCancel={() => {
+              setIsNewProgramDialogOpen(false);
+              setNewProgramInitialData(null);
+              if (addCallbackRef.current) {
+                addCallbackRef.current(null);
+                addCallbackRef.current = null;
+              }
+            }}
+          />
+        </ReusableDialog>
+      )}
     </div>
   );
 }
