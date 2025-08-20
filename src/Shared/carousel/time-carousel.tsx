@@ -127,7 +127,7 @@ export default function TimeCarousel({ selectedTime,onRangeChange,leftslide,righ
   }, [selectedTime]);
 
   return (
-    <div className="flex items-end bg-gray-500 text-white p-[2px] rounded w-full relative top-0 left-0 right-0 bottom-0">
+    <div className="flex items-end bg-[#444444] text-white p-[2px] rounded w-full relative top-0 left-0 right-0 bottom-0">
       <button onClick={leftslide} className="text-black py-4 bg-white rounded">
         <ChevronLeft className="h-5 w-5" />
       </button>

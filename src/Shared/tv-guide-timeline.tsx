@@ -47,52 +47,102 @@ export default function TvGuideTimeline() {
       id: "1",
       group: "channel-a",
       content: "Morning News",
-      start: new Date(2025, 6, 14, 8, 0, 0),
-      end: new Date(2025, 6, 14, 9, 0, 0),
+      start: new Date(2025, 7, 19, 20, 0, 0), // August 19, 2025
+      end: new Date(2025, 7, 19, 21, 0, 0), // August 19, 2025
       type: "range",
       imageUrl: "/placeholder.svg?height=40&width=60",
       description: "Daily morning news updates.",
     },
     {
       id: "2",
-      group: "channel-a",
+      group: "channel-b",
       content: "Talk Show",
-      start: new Date(2025, 6, 14, 9, 30, 0),
-      end: new Date(2025, 6, 14, 10, 30, 0),
+      start: new Date(2025, 7, 19, 20, 30, 0), // August 19, 2025
+      end: new Date(2025, 7, 19, 21, 30, 0), // August 19, 2025
       type: "range",
       imageUrl: "/placeholder.svg?height=40&width=60",
       description: "Interviews with celebrities and experts.",
     },
     {
       id: "3",
-      group: "channel-b",
+      group: "channel-d",
       content: "Documentary",
-      start: new Date(2025, 6, 14, 10, 0, 0),
-      end: new Date(2025, 6, 14, 11, 30, 0),
+      start: new Date(2025, 7, 19, 20, 0, 0), // August 19, 2025
+      end: new Date(2025, 7, 19, 21, 30, 0), // August 19, 2025
       type: "range",
       imageUrl: "/placeholder.svg?height=40&width=60",
       description: "Exploring the wonders of nature.",
     },
     {
       id: "4",
-      group: "channel-c",
+      group: "channel-e",
       content: "Kids Show",
-      start: new Date(2025, 6, 14, 11, 0, 0),
-      end: new Date(2025, 6, 14, 12, 0, 0),
+      start: new Date(2025, 7, 19, 20, 0, 0), // August 19, 2025
+      end: new Date(2025, 7, 19, 21, 0, 0), // August 19, 2025
       type: "range",
       imageUrl: "/placeholder.svg?height=40&width=60",
       description: "Fun and educational content for children.",
     },
     {
       id: "5",
-      group: "channel-a",
+      group: "channel-f",
       content: "Evening Movie",
-      start: new Date(2025, 6, 14, 19, 0, 0),
-      end: new Date(2025, 6, 14, 21, 0, 0),
+      start: new Date(2025, 7, 19, 22, 0, 0), // August 19, 2025
+      end: new Date(2025, 7, 19, 23, 0, 0), // August 19, 2025
       type: "range",
       imageUrl: "/placeholder.svg?height=40&width=60",
       description: "Blockbuster movie of the week.",
     },
+    {
+      id: "6",
+      group: "channel-g",
+      content: "Morning News",
+      start: new Date(2025, 8, 19, 22, 0, 0), // September 19, 2025
+      end: new Date(2025, 8, 19, 23, 0, 0), // September 19, 2025
+      type: "range",
+      imageUrl: "/placeholder.svg?height=40&width=60",
+      description: "Daily morning news updates.",
+    },
+    {
+      id: "7",
+      group: "channel-h",
+      content: "Talk Show",
+      start: new Date(2025, 8, 19, 22, 30, 0), // September 19, 2025
+      end: new Date(2025, 8, 19, 23, 30, 0), // September 19, 2025
+      type: "range",
+      imageUrl: "/placeholder.svg?height=40&width=60",
+      description: "Interviews with celebrities and experts.",
+    },
+    {
+      id: "8",
+      group: "channel-b",
+      content: "Documentary",
+      start: new Date(2025, 8, 19, 10, 0, 0), // September 19, 2025
+      end: new Date(2025, 8, 19, 11, 30, 0), // September 19, 2025
+      type: "range",
+      imageUrl: "/placeholder.svg?height=40&width=60",
+      description: "Exploring the wonders of nature.",
+    },
+    {
+      id: "9",
+      group: "channel-c",
+      content: "Kids Show",
+      start: new Date(2025, 8, 19, 11, 0, 0), // September 19, 2025
+      end: new Date(2025, 8, 19, 12, 0, 0), // September 19, 2025
+      type: "range",
+      imageUrl: "/placeholder.svg?height=40&width=60",
+      description: "Fun and educational content for children.",
+    },
+    {
+      id: "10",
+      group: "channel-a",
+      content: "Evening Movie",
+      start: new Date(2025, 8, 19, 19, 0, 0), // September 19, 2025
+      end: new Date(2025, 8, 19, 21, 0, 0), // September 19, 2025
+      type: "range",
+      imageUrl: "/placeholder.svg?height=40&width=60",
+      description: "Blockbuster movie of the week.",
+    }
   ]);
 
   // Add a ref to always have the latest items
@@ -481,9 +531,9 @@ export default function TvGuideTimeline() {
           `,
         },
         timeAxis: { scale: "minute" as TimelineTimeAxisScaleType, step: 30 },
-        timeStep: 30 * 60 * 1000, // 30 minutes
+        timeStep: 60 * 1000,
         snap: function (date: Date) {
-          const ms = 1000 * 60 * 30; // 30 minutes in ms
+          const ms = 1000 * 60; // 1 minute in ms
           return new Date(Math.round(date.valueOf() / ms) * ms);
         },
         margin: {
