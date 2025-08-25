@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
-// import { createRoot } from "react-dom/client";
+import { createRoot } from "react-dom/client";
 import { Timeline, type TimelineItem } from "vis-timeline/standalone";
 import type { TimelineTimeAxisScaleType } from "vis-timeline";
 import { DataSet } from "vis-data/peer";
@@ -19,15 +19,15 @@ import { EditProgramForm } from "./EditProgramForm";
 import { cn } from "../lib/utlils";
 import type { Channel, Program } from "../types/interface";
 import { NewProgram } from "./NewProgram";
-// import type { Root } from "react-dom/client";
-// import TimelineItemContent from "./TimelineItem";
+import type { Root } from "react-dom/client";
+import TimelineItemContent from "./TimelineItem";
 
 export default function TvGuideTimeline() {
   const timelineRef = useRef<HTMLDivElement>(null);
   const timelineInstance = useRef<Timeline | null>(null);
   const itemsDataSet = useRef<DataSet<Program> | null>(null);
   const groupsDataSet = useRef<DataSet<Channel> | null>(null);
-  // const itemRoots = useRef<Map<string | number, Root>>(new Map()); // Map to store React roots for items
+  const itemNodesRef = useRef<Map<string | number, { root: Root; el: HTMLDivElement }>>(new Map());
   // State for selected date and time from carousels
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(
@@ -554,76 +554,47 @@ export default function TvGuideTimeline() {
           },
         },
         // UPDATED: Display start and end times on the program bar
-        template: (item: Program) => {
-          if (!item) return "";
+template: (item: Program) => {
+  if (!item) return "";
 
-          const startTime =
-            item.start instanceof Date && !isNaN(item.start.getTime())
-              ? item.start.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "Invalid Time";
-          const endTime =
-            item.end instanceof Date && !isNaN(item.end.getTime())
-              ? item.end.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "Invalid Time";
-          // const startDateObj = new Date(startTime as string | number)
-          // const endDateObj = new Date(endTime as string | number)
+  // 1) Normalize to real Dates (handle Date | number | string)
+  const toDate = (v: any): Date => (v instanceof Date ? v : new Date(v));
 
-          // Use HTML template instead of React component for better compatibility with vis.js
-          return `
-            <div class="Timelineitem-container">
-              ${
-                item.imageUrl
-                  ? `
-                <div class="flex-shrink-0">
-                  <img
-                    src="${item.imageUrl}"
-                    alt="${item.content || "Program image"}"
-                    width="40"
-                    height="40"
-                    class="h-10 w-10 rounded object-cover"
-                  />
-                </div>
-              `
-                  : ""
-              }
-              <div class="flex min-w-0 flex-col justify-center">
-                <div class="text-sm font-medium leading-tight text-gray-900 line-clamp-1">${
-                  item.content
-                }</div>
-                <div class="text-xs text-gray-500">
-                  ${startTime} - ${endTime}
-                </div>
-                ${
-                  item.description
-                    ? `<div class="text-xs text-gray-600 line-clamp-2">${item.description}</div>`
-                    : ""
-                }
-              </div>
-            </div>
-              `;
+  const startDateObj = toDate(item.start);
+  const endDateObj = toDate(item.end);
 
-          // const programItem = itemsRef.current.find((p) => String(p.id) === String(item.id))
-          // if (!programItem) return ""
+  // Optional fallback from your React state if vis item is odd
+  const programItem = itemsRef.current.find((p) => String(p.id) === String(item.id));
+  if (!programItem) return "";
 
-          // const container = document.createElement("div")
-          // container.className = "p-0" // Basic styling for the container
+  // If either is invalid, try to recover from programItem
+  const startSafe = !isNaN(startDateObj.getTime())
+    ? startDateObj
+    : toDate(programItem.start as any);
+  const endSafe = !isNaN(endDateObj.getTime())
+    ? endDateObj
+    : toDate(programItem.end as any);
 
-          // // Create a React root and render the component
-          // let root = itemRoots.current.get(programItem.id)
-          // if (!root) {
-          //   root = createRoot(container)
-          //   itemRoots.current.set(programItem.id, root)
-          // }
-          // root.render(<TimelineItemContent program={programItem} endTime={endDateObj} startTime={startDateObj} key={programItem.id} />)
+  // 2) Reuse the same element + root (your existing map approach)
+  let entry = itemNodesRef.current.get(programItem.id);
+  if (!entry) {
+    const el = document.createElement("div");
+    el.className = "p-0 bg-gray-200";
+    const root = createRoot(el);
+    entry = { root, el };
+    itemNodesRef.current.set(programItem.id, entry);
+  }
 
-          // return container
-        },
+  entry.root.render(
+    <TimelineItemContent
+      program={programItem}
+      startTime={startSafe}
+      endTime={endSafe}
+    />
+  );
+
+  return entry.el;
+},
 
         groupTemplate: (group: Channel) => {
           if (!group) return "";
@@ -631,11 +602,10 @@ export default function TvGuideTimeline() {
 
           return `
             <div class="flex items-center gap-2 p-2">
-              ${
-                group.logo
-                  ? `<img src="${group.logo}" alt="${group.content} logo" width="120px" />`
-                  : `<span class="text-sm font-medium">${group.content}</span>`
-              }
+              ${group.logo
+              ? `<img src="${group.logo}" alt="${group.content} logo" width="90px" />`
+              : `<span class="text-sm font-medium">${group.content}</span>`
+            }
             </div>
           `;
         },
@@ -700,12 +670,12 @@ export default function TvGuideTimeline() {
             prevItems.map((i) =>
               i.id === item.id
                 ? {
-                    ...i,
-                    content: String(item.content),
-                    start: new Date(item.start),
-                    end: new Date(item.end!),
-                    group: String(item.group),
-                  }
+                  ...i,
+                  content: String(item.content),
+                  start: new Date(item.start),
+                  end: new Date(item.end!),
+                  group: String(item.group),
+                }
                 : i
             )
           );
@@ -801,7 +771,7 @@ export default function TvGuideTimeline() {
         if (properties.item) {
           const selectedId = properties.item;
           const item = itemsRef.current.find((i) => i.id === selectedId);
-          console.log("updatedProgram douvleclick====>",item)
+          console.log("updatedProgram douvleclick====>", item)
           if (item) {
             setSelectedItem(item);
             setIsEditDialogOpen(true);
@@ -821,6 +791,14 @@ export default function TvGuideTimeline() {
       };
     }
   }, []); //items, groups
+  useEffect(() => {
+    return () => {
+      for (const entry of itemNodesRef.current.values()) {
+        entry.root.unmount();
+      }
+      itemNodesRef.current.clear();
+    };
+  }, []);
 
   // Function to set the timeline window
   const setTimelineWindow = () => {
@@ -933,17 +911,17 @@ export default function TvGuideTimeline() {
       />
 
       {/* Custom Time Carousel */}
-      <div className="flex items-center bg-gray-800 text-white px-1 rounded-b-lg mb-4 time-carousel-container gap-1">
-        <div className="bg-white px-2 h-12 flex justify-center items-center">
+      <div className="flex items-center text-white px-1 rounded-b-lg mb-4 time-carousel-container">
+        <div className="bg-white px-2 h-14 flex justify-center items-center">
           <button
             onClick={handleGoLive}
             className={cn(
-              " text-white flex items-center justify-center gap-x-2 w-[100px] h-8",
+              " text-white flex items-center justify-center gap-x-2 w-[80px] h-8",
               goLiveRed ? "bg-red-500" : "bg-gray-500"
             )}
           >
-            <div className={cn("h-3 w-3 rounded-full bg-white")} />
-            <span className="text-[18px] font-medium">Go Live</span>
+            <div className={cn("h-2 w-2 rounded-full bg-white")} />
+            <span className="text-[15px] font-medium">Go Live</span>
           </button>
         </div>
         <TimeCarousel

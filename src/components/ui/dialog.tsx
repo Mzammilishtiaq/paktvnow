@@ -6,7 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 
 interface ReusableDialogProps {
   open: boolean;
-  onClose: () => void;
+  onClose: (open: boolean) => void;
   title?: React.ReactNode;
   children: React.ReactNode;
   actions?: React.ReactNode;

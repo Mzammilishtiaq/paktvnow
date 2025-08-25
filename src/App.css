@@ -65,3 +65,9 @@
   border:none !important;
   background-color: transparent !important;
 }
+
+.vis-item{
+  border: none !important;
+  background-color: transparent !important;
+  padding: 0% !important;
+}
